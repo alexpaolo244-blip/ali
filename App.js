@@ -1,41 +1,35 @@
 import React, { useRef } from 'react';
-import { StyleSheet, SafeAreaView, Platform, View } from 'react-native';
+import { StyleSheet, SafeAreaView, Platform, StatusBar } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 export default function App() {
   const webViewRef = useRef(null);
 
+  // دالة لمنع الروابط من الفتح في كروم الخارجي
+  const handleNavigationStateChange = (navState) => {
+    // إذا كان الرابط لا يتبع موقعك، يمكنك التحكم به هنا
+    // حالياً سيبقيه داخل الـ WebView
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <WebView
         ref={webViewRef}
-        // ضع رابط موقعك هنا بدقة
-        source={{ uri: 'https://shofyou.com' }} 
-        style={{ flex: 1 }}
+        source={{ uri: 'https://shofyou.com' }}
+        style={styles.webview}
         
-        // --- إعدادات الاحترافية (مثل فيسبوك) ---
+        // إعدادات الرفع والاحترافية
         javaScriptEnabled={true}
         domStorageEnabled={true}
         allowsFileAccess={true}
-        allowFileAccessFromFileURLs={true}
-        allowUniversalAccessFromFileURLs={true}
+        allowsFullscreenVideo={true}
+        mixedContentMode="always"
         
-        // دعم رفع الصور والفيديوهات من المعرض مباشرة
-        onFileDownload={({ nativeEvent: { downloadUrl } }) => {
-          // يمكن إضافة منطق التحميل هنا إذا لزم الأمر
-        }}
-        
-        // دعم تشغيل الفيديو بملء الشاشة (Full Screen)
-        allowsFullscreenVideo={true} 
-        
-        // تحسين الأداء ومنع التحديث التلقائي عند السحب
-        bounces={false} 
-        overScrollMode="never"
-        
-        // معالجة الأخطاء
-        onHttpError={(syntheticEvent) => {
-          const { nativeEvent } = syntheticEvent;
-          console.warn('WebView HTTP error: ', nativeEvent);
+        // منع الخروج للمتصفح الخارجي
+        onShouldStartLoadWithRequest={(request) => {
+          // يسمح فقط بفتح الروابط داخل التطبيق
+          return true; 
         }}
       />
     </SafeAreaView>
@@ -46,7 +40,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
-    // التعامل مع المنطقة العلوية للهاتف (Status Bar) لكي لا يغطيها الموقع
-    paddingTop: Platform.OS === 'android' ? 35 : 0, 
+  },
+  webview: {
+    flex: 1,
+    // تم حذف الـ Padding الزائد الذي سبب المساحة البيضاء في صورتك
+    marginTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
 });
