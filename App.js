@@ -1,42 +1,43 @@
-import React, { useState, useRef } from 'react';
-import { StyleSheet, SafeAreaView, RefreshControl, ScrollView, Platform } from 'react-native';
+import React, { useRef } from 'react';
+import { StyleSheet, SafeAreaView, Platform, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 export default function App() {
-  const [refreshing, setRefreshing] = useState(false);
   const webViewRef = useRef(null);
-
-  // ميزة سحب الشاشة للتحديث (Pull to Refresh)
-  const onRefresh = () => {
-    setRefreshing(true);
-    webViewRef.current?.reload();
-    setTimeout(() => setRefreshing(false), 1500);
-  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={{ flex: 1 }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        <WebView
-          ref={webViewRef}
-          source={{ uri: 'https://shofyou.com' }} // ضع رابط موقعك هنا
-          style={{ flex: 1 }}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          allowsFileAccess={true}
-          allowFileAccessFromFileURLs={true}
-          allowUniversalAccessFromFileURLs={true}
-          allowsFullscreenVideo={true} // دعم الفيديو بملء الشاشة
-          onHttpError={(syntheticEvent) => {
-            const { nativeEvent } = syntheticEvent;
-            console.warn('WebView HTTP error: ', nativeEvent);
-          }}
-        />
-      </ScrollView>
+      <WebView
+        ref={webViewRef}
+        // ضع رابط موقعك هنا بدقة
+        source={{ uri: 'https://shofyou.com' }} 
+        style={{ flex: 1 }}
+        
+        // --- إعدادات الاحترافية (مثل فيسبوك) ---
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        allowsFileAccess={true}
+        allowFileAccessFromFileURLs={true}
+        allowUniversalAccessFromFileURLs={true}
+        
+        // دعم رفع الصور والفيديوهات من المعرض مباشرة
+        onFileDownload={({ nativeEvent: { downloadUrl } }) => {
+          // يمكن إضافة منطق التحميل هنا إذا لزم الأمر
+        }}
+        
+        // دعم تشغيل الفيديو بملء الشاشة (Full Screen)
+        allowsFullscreenVideo={true} 
+        
+        // تحسين الأداء ومنع التحديث التلقائي عند السحب
+        bounces={false} 
+        overScrollMode="never"
+        
+        // معالجة الأخطاء
+        onHttpError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent;
+          console.warn('WebView HTTP error: ', nativeEvent);
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -45,6 +46,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
-    paddingTop: Platform.OS === 'android' ? 25 : 0, // التعامل مع شريط الحالة
+    // التعامل مع المنطقة العلوية للهاتف (Status Bar) لكي لا يغطيها الموقع
+    paddingTop: Platform.OS === 'android' ? 35 : 0, 
   },
 });
